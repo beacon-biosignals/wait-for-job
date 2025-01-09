@@ -1,0 +1,117 @@
+---
+name: Integration Tests
+on:
+  pull_request:
+    paths:
+      - "action.yaml"
+      - ".github/workflows/integration-tests.yaml"
+
+jobs:
+  target-unnamed:
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - run: sleep 10
+
+  target-named:
+    name: Target Named
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - run: sleep 10
+
+  test-same-workflow:
+    name: Test Same Workflow
+    # These permissions are needed to:
+    # - Checkout the repo
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        id: wait-for-job-unnamed
+        with:
+          run-id: ${{ github.run_id }}
+          job-name: target-unnamed
+          poll-interval: 5
+      - name: Validate wait for unnamed job
+        run: |
+          [[ "$conclusion" == "success" ]] || exit 1
+        env:
+          conclusion: ${{ steps.wait-for-job-unnamed.outputs.conclusion }}
+      - uses: ./
+        id: wait-for-job-named
+        with:
+          run-id: ${{ github.run_id }}
+          job-name: Target Named
+          poll-interval: 5
+      - name: Validate wait for named job
+        run: |
+          [[ "$conclusion" == "success" ]] || exit 1
+        env:
+          conclusion: ${{ steps.wait-for-job-named.outputs.conclusion }}
+
+  test-build-workflow:
+    name: Test Build Workflow
+    # These permissions are needed to:
+    # - Checkout the repo
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: beacon-biosignals/get-workflow-run@v1
+        id: workflow-run
+        with:
+          workflow-file: target-workflow.yaml
+          commit-sha: ${{ github.event.pull_request.head.sha }}
+      - uses: ./
+        id: wait-for-job
+        with:
+          run-id: ${{ steps.workflow-run.outputs.run-id }}
+          job-name: Build
+      - name: Validate wait job
+        run: |
+          set -x
+          # https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#get-a-workflow-run
+          status="$(gh api "/repos/{owner}/{repo}/actions/runs/${run_id}" | jq -er .status)"
+          [[ "$status" == "in_progress" ]] || exit 1
+          [[ "$conclusion" == "success" ]] || exit 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          run_id: ${{ steps.workflow-run.outputs.run-id }}
+          conclusion: ${{ steps.wait-for-job.outputs.conclusion }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: build
+          run-id: ${{ steps.workflow-run.outputs.run-id }}
+          github-token: ${{ github.token }}
+      - name: Validate artifact
+        run: |
+          jq <build.json
+          [[ "$(jq -er .run_id <build.json)" == "${{ steps.workflow-run.outputs.run-id }}" ]] || exit 1
+          [[ "$(jq -er .run_attempt <build.json)" == "${{ steps.workflow-run.outputs.run-attempt }}" ]] || exit 1
+
+  test-missing-workflow:
+    name: Test Missing Workflow
+    # These permissions are needed to:
+    # - Checkout the repo
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        id: wait-for-job
+        with:
+          run-id: ${{ github.run_id }}
+          job-name: missing
+          timeout: 10
+          poll-interval: 5
+        continue-on-error: true
+      - name: Validate timeout
+        run: |
+          [[ "$outcome" == "failure" ]] || exit 1
+        env:
+          outcome: ${{ steps.wait-for-job.outcome }}
