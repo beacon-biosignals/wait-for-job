@@ -44,7 +44,7 @@ jobs:
           [[ "$job_status" != "completed" ]] || exit 1
         env:
           GH_TOKEN: ${{ github.token }}
-          job_id: ${{ steps.wait-for-job.outputs.job-id }}
+          job_id: ${{ steps.wait-for-job-unnamed.outputs.job-id }}
           conclusion: ${{ steps.wait-for-job-unnamed.outputs.conclusion }}
       - uses: ./
         id: wait-for-job-named
@@ -61,7 +61,7 @@ jobs:
           [[ "$job_status" != "completed" ]] || exit 1
         env:
           GH_TOKEN: ${{ github.token }}
-          job_id: ${{ steps.wait-for-job.outputs.job-id }}
+          job_id: ${{ steps.wait-for-job-named.outputs.job-id }}
           conclusion: ${{ steps.wait-for-job-named.outputs.conclusion }}
 
   test-build-workflow:
@@ -102,7 +102,7 @@ jobs:
           # completed and the remaining jobs are "queued".
           # https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#get-a-workflow-run
           run_status="$(gh api "/repos/{owner}/{repo}/actions/runs/${run_id}" --jq '.status')"
-          if [[ "$run_status" != "in_progress" || "$run_status" != "queued" ]]; then
+          if [[ "$run_status" != "in_progress" && "$run_status" != "queued" ]]; then
               jq <<<"$run_jobs"
               exit 1
           fi
