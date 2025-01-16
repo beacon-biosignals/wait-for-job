@@ -28,6 +28,9 @@ while [[ $((EPOCHSECONDS - start)) -lt $timeout ]]; do
     sleep "${poll_interval}"
 done
 
+job_id="$(jq -r '.id' <<<"${job}")"
+echo "job-id=${job_id:?}" | tee -a "$GITHUB_OUTPUT"
+
 # Prefer returning `` instead of `null`.
 conclusion="$(jq -r '.conclusion // empty' <<<"${job}")"
 echo "conclusion=${conclusion}" | tee -a "$GITHUB_OUTPUT"

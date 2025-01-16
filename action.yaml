@@ -28,6 +28,8 @@ inputs:
       access artifacts in a different repository.
     default: ${{ github.token }}
 outputs:
+  job-id:
+    value: ${{ steps.wait-for-job.outputs.job-id }}
   conclusion:
     description: >-
       The result of the completed job after `continue-on-error` is applied. Possible values
