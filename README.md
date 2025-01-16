@@ -43,6 +43,7 @@ jobs:
 
 | Name         | Description | Example |
 |:-------------|:------------|:--------|
+| `job-id`     | The job ID of the job which was waited upon. | `35737668081` |
 | `conclusion` | The result of the completed job after [`continue-on-error`](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepscontinue-on-error) is applied. Possible values are `success`, `failure`, `cancelled`, or `skipped`. | `success` |
 
 ## Permissions

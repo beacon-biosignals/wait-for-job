@@ -28,6 +28,8 @@ while [[ $((EPOCHSECONDS - start)) -lt $timeout ]]; do
     sleep "${poll_interval}"
 done
 
+echo
+
 job_id="$(jq -r '.id' <<<"${job}")"
 echo "job-id=${job_id:?}" | tee -a "$GITHUB_OUTPUT"
 
