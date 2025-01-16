@@ -75,7 +75,8 @@ jobs:
         run: |
           set -x
           # https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#get-a-workflow-run
-          status="$(gh api "/repos/{owner}/{repo}/actions/runs/${run_id}" | jq -er .status)"
+          run="$(gh api "/repos/{owner}/{repo}/actions/runs/${run_id}")"
+          status="$(jq -er .status <<<"$run")"
           [[ "$status" == "in_progress" ]] || exit 1
           [[ "$conclusion" == "success" ]] || exit 1
         env:
