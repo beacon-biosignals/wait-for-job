@@ -74,7 +74,7 @@ jobs:
           poll-interval: 5
       - name: Validate wait job
         run: |
-          jobs="$(gh api -X GET "/repos/{owner}/{repo}/actions/runs/${run_id:?}/jobs" | jq '.jobs | {jobs: map({name, status, conclusion})}')"
+          jobs="$(gh api -X GET "/repos/{owner}/{repo}/actions/runs/${run_id:?}/jobs" --jq '.jobs | {jobs: map({name, status, conclusion})}')"
           job_status="$(jq '.[] | select(.name == "Build").status' <<<"$jobs")"
           [[ "$job_status" == "completed" ]] || (jq <<<"$jobs"; exit 1)
 
