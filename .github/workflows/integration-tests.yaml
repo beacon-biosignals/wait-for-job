@@ -94,7 +94,7 @@ jobs:
           # https://docs.github.com/en/rest/actions/workflow-jobs?apiVersion=2022-11-28#get-a-job-for-a-workflow-run
           job_status="$(gh api -X GET "/repos/{owner}/{repo}/actions/jobs/${job_id:?}" --jq '.status')"
           if [[ "$job_status" != "completed" ]]; then
-              jq <<<"$jobs"
+              jq <<<"$run_jobs"
               exit 1
           fi
 
@@ -103,7 +103,7 @@ jobs:
           # https://docs.github.com/en/rest/actions/workflow-runs?apiVersion=2022-11-28#get-a-workflow-run
           run_status="$(gh api "/repos/{owner}/{repo}/actions/runs/${run_id}" --jq '.status')"
           if [[ "$run_status" != "in_progress" || "$run_status" != "queued" ]]; then
-              jq <<<"$jobs"
+              jq <<<"$run_jobs"
               exit 1
           fi
         env:
