@@ -78,8 +78,7 @@ jobs:
           run="$(gh api "/repos/{owner}/{repo}/actions/runs/${run_id}")"
           status="$(jq -er .status <<<"$run")"
           if [[ "$status" != "in_progress" ]]; then
-              jq <<<"$run"
-              gh api -X GET "/repos/{owner}/{repo}/actions/runs/${run_id}/jobs" | jq
+              gh api -X GET "/repos/{owner}/{repo}/actions/runs/${run_id:?}/jobs" | jq '.jobs | {jobs: map({name, status, conclusion})}'
               exit 1
           fi
 
