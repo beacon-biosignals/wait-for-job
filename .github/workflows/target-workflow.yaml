@@ -1,0 +1,32 @@
+---
+name: Target Workflow
+on:
+  pull_request:
+    paths:
+      - "action.yaml"
+      - ".github/workflows/integration-tests.yaml"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          jq -n \
+              --argjson run_id "${{ github.run_id }}" \
+              --argjson run_attempt "${{ github.run_attempt }}" \
+              '$ARGS.named' >build.json
+          jq <build.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build.json
+
+  # Keep the workflow running to validate the action waits on job completion and not
+  # workflow completion.
+  post-build:
+    name: Post Build
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - run: sleep 60

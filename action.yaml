@@ -1,0 +1,52 @@
+---
+name: Wait for Job
+description: >-
+  Wait for a specific GitHub Actions workflow job to complete. Can be useful for
+  synchronization between separate workflows.
+branding:
+  color: purple
+  icon: refresh-cw
+inputs:
+  run-id:
+    description: The workflow run containing the job to wait for.
+    required: true
+  job-name:
+    description: The rendered workflow job name to wait for.
+    required: true
+  timeout:
+    description: The maximum amount of seconds to wait for the workflow job.
+    default: "600"
+  poll-interval:
+    description: Number of seconds between job status checks.
+    default: "15"
+  repository:
+    description: The repository runing the workflow.
+    default: ${{ github.repository }}
+  token:
+    description: >-
+      The GitHub token used to authenticate with the GitHub API. Need when attempting to
+      access artifacts in a different repository.
+    default: ${{ github.token }}
+outputs:
+  job-id:
+    description: The job ID of the job which was waited upon.
+    value: ${{ steps.wait-for-job.outputs.job-id }}
+  conclusion:
+    description: >-
+      The result of the completed job after `continue-on-error` is applied. Possible values
+      are `success`, `failure`, `cancelled`, or `skipped`.
+    value: ${{ steps.wait-for-job.outputs.conclusion }}
+runs:
+  using: composite
+  steps:
+    - name: Wait for job
+      id: wait-for-job
+      run: ${{ github.action_path }}/wait-for-job.sh
+      shell: bash
+      env:
+        GH_REPO: ${{ inputs.repository }}
+        GH_TOKEN: ${{ inputs.token }}
+        run_id: ${{ inputs.run-id }}
+        job_name: ${{ inputs.job-name }}
+        timeout: ${{ inputs.timeout }}
+        poll_interval: ${{ inputs.poll-interval }}
