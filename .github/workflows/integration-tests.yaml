@@ -71,6 +71,7 @@ jobs:
         with:
           run-id: ${{ steps.workflow-run.outputs.run-id }}
           job-name: Build
+          poll-interval: 5
       - name: Validate wait job
         run: |
           set -x
