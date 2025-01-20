@@ -72,6 +72,17 @@ jobs:
           job_id: ${{ steps.wait-for-job-named.outputs.job-id }}
           conclusion: ${{ steps.wait-for-job-named.outputs.conclusion }}
 
+  setup-build-workflow:
+    name: Setup Build Workflow
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initiate target workflow
+        uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4
+        with:
+          workflow: target-workflow.yaml
+          ref: ${{ github.head_ref || github.ref_name }}  # Workflow dispatch only works on branches or tags
+
   test-build-workflow:
     name: Test Build Workflow
     # These permissions are needed to:
