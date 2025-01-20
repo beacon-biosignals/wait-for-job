@@ -88,6 +88,7 @@ jobs:
 
   test-build-workflow:
     name: Test Build Workflow
+    needs: setup-build-workflow
     # These permissions are needed to:
     # - Checkout the repo
     permissions:
