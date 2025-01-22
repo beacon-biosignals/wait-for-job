@@ -1,10 +1,7 @@
 ---
 name: Target Workflow
 on:
-  pull_request:
-    paths:
-      - "action.yaml"
-      - ".github/workflows/integration-tests.yaml"
+  workflow_dispatch: {}
 
 jobs:
   build:

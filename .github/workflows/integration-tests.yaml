@@ -4,6 +4,14 @@ on:
   pull_request:
     paths:
       - "action.yaml"
+      - ".github/workflows/target-workflow.yaml"
+      - ".github/workflows/integration-tests.yaml"
+  push:
+    branches: ["main"]
+    tags: ["*"]
+    paths:
+      - "action.yaml"
+      - ".github/workflows/target-workflow.yaml"
       - ".github/workflows/integration-tests.yaml"
 
 jobs:
@@ -66,8 +74,23 @@ jobs:
           job_id: ${{ steps.wait-for-job-named.outputs.job-id }}
           conclusion: ${{ steps.wait-for-job-named.outputs.conclusion }}
 
+  setup-build-workflow:
+    name: Setup Build Workflow
+    # These permissions are needed to:
+    # - Create a workflow dispatch event: https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event
+    permissions: 
+      actions: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initiate target workflow
+        uses: benc-uk/workflow-dispatch@e2e5e9a103e331dad343f381a29e654aea3cf8fc # v1.2.4
+        with:
+          workflow: target-workflow.yaml
+          ref: ${{ github.head_ref || github.ref_name }}  # Workflow dispatch only works on branches or tags
+
   test-build-workflow:
     name: Test Build Workflow
+    needs: setup-build-workflow
     # These permissions are needed to:
     # - Checkout the repo
     permissions:
@@ -79,7 +102,7 @@ jobs:
         id: workflow-run
         with:
           workflow-file: target-workflow.yaml
-          commit-sha: ${{ github.event.pull_request.head.sha }}
+          commit-sha: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: ./
         id: wait-for-job
         with:
