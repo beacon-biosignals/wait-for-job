@@ -36,7 +36,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./
         id: wait-for-job-unnamed
         with:
@@ -97,7 +97,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: beacon-biosignals/get-workflow-run@v1
         id: workflow-run
         with:
@@ -155,7 +155,7 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./
         id: wait-for-job
         with:
