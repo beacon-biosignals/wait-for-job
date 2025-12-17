@@ -136,7 +136,7 @@ jobs:
           run_id: ${{ steps.workflow-run.outputs.run-id }}
           job_id: ${{ steps.wait-for-job.outputs.job-id }}
           conclusion: ${{ steps.wait-for-job.outputs.conclusion }}
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: build
           run-id: ${{ steps.workflow-run.outputs.run-id }}
